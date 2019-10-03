@@ -1,0 +1,41 @@
+---
+- name: cicd
+  hosts: devserver
+  tasks:
+   - name: download jenkins
+     get_url: 
+      url: http://mirrors.jenkins.io/war-stable/latest/jenkins.war
+      dest: /home/ubuntu
+   - name: install jenkins
+     apt:
+      name: "{{item.a}}"
+      state: present
+      update_cache: "{{item.b}}"
+     with_items:
+      - {a: default-jre,b: yes}
+      - {a: jenkins,b: no}
+      - {a: git,b: no}
+      - {a: maven,b: no}
+
+- name: install tomcat8 and tomcat8-admin
+  hosts: servers
+  tasks:
+   - name: install tomcat8 and tomcat8-admin
+     apt:
+      name: "{{item}}"
+      state: present
+      update_cache: yes
+     with_items:
+      - tomcat8
+      - tomcat8-admin
+
+- name: tomcat8-users.xml
+  hosts: servers
+  tasks:
+   - name: edit the tomcat8-users.xml
+     win_xml:
+      path: /home/ubuntu/etc/tomcat8/tomcat8-users.xml
+      fragment: <tomcat-users> <user username="ashok" password="ashokkumar" roles="manager-script"/></tomcat-users>
+      xpath: '/*'
+
+...
